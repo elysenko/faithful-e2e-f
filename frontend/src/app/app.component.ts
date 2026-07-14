@@ -9,6 +9,10 @@ import { AuthService } from './core/services/auth.service';
   imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
+  // Readiness landmark for the post-deploy render gate. Bound to the hydrated
+  // <app-root> host element so it is present on every route without editing the
+  // write-locked template. Removing it makes every deploy fail the gate.
+  host: { 'data-testid': 'app-ready' },
 })
 export class AppComponent {
   constructor(public auth: AuthService) {}

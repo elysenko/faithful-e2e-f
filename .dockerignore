@@ -1,0 +1,11 @@
+# Keep host build artifacts out of the Docker build context so `COPY backend/ .`
+# / `COPY frontend/ .` never overwrite the image's freshly-installed, platform-
+# correct dependencies (host is glibc; images are musl/alpine). Also avoids
+# shipping a stale incremental TS cache that makes tsc emit an empty dist/.
+**/node_modules
+**/dist
+**/*.tsbuildinfo
+**/.angular
+.git
+**/.env
+**/.env.*

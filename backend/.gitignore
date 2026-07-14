@@ -41,3 +41,6 @@ lerna-debug.log*
 .env
 .env.prod
 pnpm-workspace.yaml
+# TypeScript incremental build cache — must never be committed;
+# a stale cache + deleteOutDir makes tsc emit nothing (empty dist/) in Docker.
+*.tsbuildinfo

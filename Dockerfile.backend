@@ -1,7 +1,9 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY backend/package*.json ./
-RUN npm ci
+# `npm install` (not `npm ci`): the backend ships a pnpm-lock.yaml, not a
+# package-lock.json, so `npm ci` would abort ("no package-lock.json found").
+RUN npm install --no-audit --no-fund
 COPY backend/ .
 RUN npm run build
 
