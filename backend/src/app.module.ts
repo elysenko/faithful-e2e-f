@@ -5,6 +5,8 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
 import { UserModule } from './user/user.module';
+import { RecipesModule } from './recipes/recipes.module';
+import { AdminModule } from './admin/admin.module';
 import { validateConfig } from './common/config/env.config';
 import { HealthModule } from './health/health.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
@@ -27,6 +29,8 @@ import { APP_GUARD } from '@nestjs/core';
     AuthModule,
     PrismaModule,
     UserModule,
+    RecipesModule,
+    AdminModule,
     HealthModule,
   ],
   controllers: [AppController],

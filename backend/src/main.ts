@@ -9,7 +9,9 @@ import helmet from 'helmet';
 export async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.setGlobalPrefix('api/v1');
+  // Global prefix must be `api` to match the Angular frontend (environment.apiUrl = '/api')
+  // and the nginx `/api/` proxy → backend:3000/api/. Do not add a version segment here.
+  app.setGlobalPrefix('api');
 
   const configService = app.get(ConfigService);
   app.use(helmet());
@@ -35,7 +37,8 @@ export async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
 
-  SwaggerModule.setup('api', app, document, swaggerOptions);
+  // Served at /docs to avoid colliding with the `api` global prefix (GET /api).
+  SwaggerModule.setup('docs', app, document, swaggerOptions);
 
   // End Swagger Configurations --------------------------------
 
