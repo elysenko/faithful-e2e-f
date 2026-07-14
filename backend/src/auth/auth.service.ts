@@ -54,9 +54,7 @@ export class AuthService {
 
       return {
         user: newuser,
-        token: this.getJwtToken({
-          id: newuser.id,
-        }),
+        token: this.getJwtToken(newuser),
       };
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
@@ -103,20 +101,23 @@ export class AuthService {
     this.logger.log(`POST: auth/login: Usuario aceptado: ${user.email}`);
     return {
       user,
-      token: this.getJwtToken({
-        id: user.id,
-      }),
+      token: this.getJwtToken(user),
     };
   }
 
   async refreshToken(user: User) {
     return {
       user: user,
-      token: this.getJwtToken({ id: user.id }),
+      token: this.getJwtToken(user),
     };
   }
 
-  private getJwtToken(payload: JwtPayload) {
+  private getJwtToken(user: { id: string; email: string; role: string }) {
+    const payload: JwtPayload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    };
     const token = this.jwtService.sign(payload);
     return token;
   }

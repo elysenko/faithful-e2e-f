@@ -24,6 +24,7 @@ const SEED_USERS = [
 async function main() {
   if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL not set');
   const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  const credsMap = {};
   try {
     for (const u of SEED_USERS) {
       const plain  = derivePassword(u.email);
@@ -38,11 +39,12 @@ async function main() {
                "updatedAt" = now()`,
         [randomUUID(), u.name, u.email, hashed, u.role],
       );
-      console.log(`SEED_CRED ${u.role} ${u.email} ${plain}`);
+      credsMap[u.role] = { email: u.email, password: plain };
     }
   } finally {
     await pool.end();
   }
+  console.log(`SEED_CREDS_JSON=${JSON.stringify(credsMap)}`);
 }
 
 main().catch(e => { console.error(e.message); process.exit(1); });
