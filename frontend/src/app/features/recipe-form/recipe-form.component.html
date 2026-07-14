@@ -1,0 +1,57 @@
+<div class="page form-page">
+  <nav class="crumbs">
+    <a routerLink="/recipes">← Back to recipes</a>
+  </nav>
+
+  <h1>{{ isEdit ? 'Edit recipe' : 'New recipe' }}</h1>
+  <p class="muted subtitle">
+    {{ isEdit ? 'Update the details of your recipe.' : 'Add a recipe to your box — title, ingredients and steps.' }}
+  </p>
+
+  @if (loading()) {
+    <div class="card loading-card">
+      <div class="spinner"></div>
+      <p class="muted">Loading recipe…</p>
+    </div>
+  } @else {
+    <form class="card form-card" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      @if (error()) {
+        <div class="alert alert-error" style="margin-bottom: var(--space-4);">{{ error() }}</div>
+      }
+
+      <div class="field">
+        <label for="title">Title</label>
+        <input id="title" type="text" formControlName="title" data-testid="recipe-title"
+               placeholder="e.g. Banitsa" />
+        @if (form.get('title')?.invalid && form.get('title')?.touched) {
+          <span class="field-error">A title is required.</span>
+        }
+      </div>
+
+      <div class="field">
+        <label for="ingredients">Ingredients</label>
+        <textarea id="ingredients" formControlName="ingredients" rows="5" data-testid="recipe-ingredients"
+                  placeholder="List each ingredient, one per line or comma-separated"></textarea>
+        @if (form.get('ingredients')?.invalid && form.get('ingredients')?.touched) {
+          <span class="field-error">Add at least one ingredient.</span>
+        }
+      </div>
+
+      <div class="field">
+        <label for="steps">Steps</label>
+        <textarea id="steps" formControlName="steps" rows="7" data-testid="recipe-steps"
+                  placeholder="Describe how to make it, step by step"></textarea>
+        @if (form.get('steps')?.invalid && form.get('steps')?.touched) {
+          <span class="field-error">Add the preparation steps.</span>
+        }
+      </div>
+
+      <div class="form-actions">
+        <a routerLink="/recipes" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary" data-testid="save-recipe" [disabled]="saving()">
+          {{ saving() ? 'Saving…' : (isEdit ? 'Save changes' : 'Create recipe') }}
+        </button>
+      </div>
+    </form>
+  }
+</div>

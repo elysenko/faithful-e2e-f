@@ -1,0 +1,59 @@
+<div class="page">
+  <header class="list-head">
+    <div>
+      <h1>My Recipes</h1>
+      <p class="muted">{{ recipes().length }} recipe{{ recipes().length === 1 ? '' : 's' }} in your box</p>
+    </div>
+    <a routerLink="/recipes/new" class="btn btn-primary" data-testid="add-recipe">+ New recipe</a>
+  </header>
+
+  @if (loading()) {
+    <div class="state-card card">
+      <div class="spinner"></div>
+      <p class="muted">Loading your recipes…</p>
+    </div>
+  } @else if (error()) {
+    <div class="alert alert-error">{{ error() }}</div>
+  } @else if (recipes().length === 0) {
+    <div class="state-card card">
+      <div class="empty-emoji">🍳</div>
+      <h3>No recipes yet</h3>
+      <p class="muted">Your recipe box is empty. Add your first recipe to get started.</p>
+      <a routerLink="/recipes/new" class="btn btn-primary">Add your first recipe</a>
+    </div>
+  } @else {
+    <ul class="recipe-grid">
+      @for (recipe of recipes(); track recipe.id) {
+        <li class="recipe-card card" data-testid="recipe-item">
+          <div class="recipe-body">
+            <h3 class="recipe-title">{{ recipe.title }}</h3>
+            <p class="recipe-snippet">{{ recipe.ingredients }}</p>
+          </div>
+          <div class="recipe-actions">
+            <a [routerLink]="['/recipes', recipe.id, 'edit']" class="btn btn-secondary btn-sm">Edit</a>
+            <button type="button" class="btn btn-ghost btn-sm danger" (click)="askDelete(recipe.id)"
+                    [attr.data-testid]="'delete-' + recipe.id">Delete</button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>
+
+@if (deleteTarget()) {
+  <div class="modal-backdrop" (click)="cancelDelete()">
+    <div class="modal card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true"
+         data-testid="delete-modal">
+      <h3>Delete recipe?</h3>
+      <p class="muted">
+        “{{ deleteTarget()?.title }}” will be permanently removed from your recipe box.
+        This can’t be undone.
+      </p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+        <button type="button" class="btn btn-danger" (click)="confirmDelete()"
+                data-testid="confirm-delete">Delete recipe</button>
+      </div>
+    </div>
+  </div>
+}

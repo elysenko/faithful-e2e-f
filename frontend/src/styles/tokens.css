@@ -1,0 +1,79 @@
+/* FaithfulF Recipe Box — approved design tokens.
+   Component CSS must reference only these var(--*) names — never raw hex/rgb. */
+:root {
+  /* Surfaces & background — warm kitchen cream */
+  --color-bg: #faf6f0;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f5ede1;
+  --color-surface-sunken: #f0e6d6;
+
+  /* Brand — terracotta / baked-clay */
+  --color-primary: #c2410c;
+  --color-primary-hover: #9a3412;
+  --color-primary-soft: #fbe7dc;
+  --color-primary-contrast: #ffffff;
+
+  /* Accent — herb green */
+  --color-accent: #15803d;
+  --color-accent-soft: #dcfce7;
+
+  /* Text */
+  --color-text: #292524;
+  --color-text-muted: #78716c;
+  --color-text-faint: #a8a29e;
+  --color-on-primary: #ffffff;
+
+  /* Lines */
+  --color-border: #e7ddce;
+  --color-border-strong: #d6c8b2;
+
+  /* Status */
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
+  --color-danger-soft: #fef2f2;
+  --color-success: #15803d;
+  --color-success-soft: #dcfce7;
+  --color-warn: #b45309;
+  --color-warn-soft: #fef3c7;
+  --color-info: #0369a1;
+  --color-info-soft: #e0f2fe;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(41, 37, 36, 0.06);
+  --shadow-md: 0 4px 14px rgba(41, 37, 36, 0.08);
+  --shadow-lg: 0 12px 32px rgba(41, 37, 36, 0.14);
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-8: 48px;
+
+  /* Typography */
+  --font-sans: 'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+  --font-serif: 'Georgia', 'Times New Roman', serif;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --text-2xl: 28px;
+
+  /* Layout */
+  --header-h: 60px;
+  --bottomnav-h: 64px;
+  --content-max: 960px;
+
+  /* Safe areas (mobile notch/home indicator) */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}

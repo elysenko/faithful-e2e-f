@@ -1,0 +1,52 @@
+<div class="page">
+  <header class="admin-head">
+    <div>
+      <h1>Admin overview</h1>
+      <p class="muted">Recipe counts across every user.</p>
+    </div>
+    <a routerLink="/admin/settings" class="btn btn-secondary">Service settings</a>
+  </header>
+
+  <div class="stat-row">
+    <div class="stat card">
+      <span class="stat-value">{{ totalUsers() }}</span>
+      <span class="stat-label">Users</span>
+    </div>
+    <div class="stat card">
+      <span class="stat-value">{{ totalRecipes() }}</span>
+      <span class="stat-label">Total recipes</span>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="card state-card"><div class="spinner"></div><p class="muted">Loading overview…</p></div>
+  } @else if (error()) {
+    <div class="alert alert-error">{{ error() }}</div>
+  } @else {
+    <div class="card table-wrap">
+      <table class="admin-table" data-testid="admin-overview">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th class="num">Recipes</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.email) {
+            <tr>
+              <td class="user-cell">
+                <span class="avatar">{{ row.email.charAt(0).toUpperCase() }}</span>
+                <span class="email">{{ row.email }}</span>
+              </td>
+              <td class="num">
+                <span class="count-pill">{{ row.recipeCount }}</span>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="2" class="muted empty">No users found.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

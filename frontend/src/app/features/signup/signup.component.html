@@ -1,0 +1,63 @@
+<div class="auth-page">
+  <div class="auth-brand">
+    <span>🥘</span><span>FaithfulF <span class="accent">Recipe Box</span></span>
+  </div>
+  <p class="auth-tagline">Create an account and start saving recipes.</p>
+
+  <div class="auth-card">
+    <h2>Create your account</h2>
+    <p class="sub">It only takes a moment.</p>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <div class="field">
+        <label for="name">Name</label>
+        <input id="name" type="text" formControlName="name" autocomplete="name" placeholder="Jane Cook" />
+        @if (form.get('name')?.invalid && form.get('name')?.touched) {
+          <span class="field-error">Name is required.</span>
+        }
+      </div>
+
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email" autocomplete="email"
+               data-testid="signup-email" placeholder="you@example.com" />
+        @if (form.get('email')?.invalid && form.get('email')?.touched) {
+          <span class="field-error">Enter a valid email address.</span>
+        }
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" formControlName="password" autocomplete="new-password"
+               data-testid="signup-password" placeholder="At least 8 characters" />
+        @if (form.get('password')?.hasError('required') && form.get('password')?.touched) {
+          <span class="field-error">Password is required.</span>
+        } @else if (form.get('password')?.hasError('minlength') && form.get('password')?.touched) {
+          <span class="field-error">Use at least 8 characters.</span>
+        }
+      </div>
+
+      <div class="field">
+        <label for="confirmPassword">Confirm password</label>
+        <input id="confirmPassword" type="password" formControlName="confirmPassword"
+               autocomplete="new-password" placeholder="Re-enter your password" />
+        @if (form.hasError('mismatch') && form.get('confirmPassword')?.touched) {
+          <span class="field-error">Passwords do not match.</span>
+        }
+      </div>
+
+      @if (errorMessage) {
+        <div class="alert alert-error" style="margin-bottom: var(--space-4);">{{ errorMessage }}</div>
+      }
+
+      <button type="submit" class="btn btn-primary btn-block" data-testid="signup-submit"
+              [disabled]="loading">
+        {{ loading ? 'Creating account…' : 'Create account' }}
+      </button>
+    </form>
+
+    <p class="auth-alt">
+      Already have an account? <a routerLink="/login">Sign in</a>
+    </p>
+  </div>
+</div>

@@ -1,0 +1,64 @@
+<div class="page">
+  <nav class="crumbs"><a routerLink="/admin">← Back to overview</a></nav>
+
+  <header class="settings-head">
+    <h1>Service settings</h1>
+    <p class="muted">Configure credentials for the app's backing services. Stored values are masked.</p>
+  </header>
+
+  @if (savedService()) {
+    <div class="alert alert-info" style="margin-bottom: var(--space-4);">
+      Settings for <strong>{{ savedService() }}</strong> saved.
+    </div>
+  }
+
+  <div class="service-list">
+    @for (group of groups(); track group.service) {
+      <section class="card service-card">
+        <header class="service-card-head">
+          <div class="service-title">
+            <span class="service-icon">{{ group.icon }}</span>
+            <div>
+              <h2>{{ group.label }}</h2>
+              <code class="service-key">{{ group.service }}</code>
+            </div>
+          </div>
+          @if (isConfigured(group)) {
+            <span class="badge badge-success">Configured</span>
+          } @else {
+            <span class="badge badge-warn">Not configured</span>
+          }
+        </header>
+
+        <div class="service-fields">
+          @for (setting of group.keys; track setting.key) {
+            <div class="field">
+              <label [for]="setting.key">
+                {{ setting.label }}
+                <code class="env-name">{{ setting.key }}</code>
+              </label>
+              <input
+                [id]="setting.key"
+                [name]="setting.key"
+                type="text"
+                [placeholder]="setting.configured ? setting.value : 'Not set'"
+                [ngModel]="draft()[setting.key]"
+                (ngModelChange)="updateDraft(setting.key, $event)"
+              />
+              @if (setting.configured) {
+                <span class="muted current">Current: <code>{{ setting.value }}</code></span>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="service-actions">
+          <button type="button" class="btn btn-primary btn-sm" (click)="saveService(group)"
+                  [attr.data-testid]="'save-' + group.service">
+            Save {{ group.label }}
+          </button>
+        </div>
+      </section>
+    }
+  </div>
+</div>

@@ -1,0 +1,50 @@
+@if (auth.isLoggedIn()) {
+  <!-- Top header -->
+  <header class="app-header">
+    <a class="brand" routerLink="/recipes">
+      <span class="brand-mark">🥘</span>
+      <span class="brand-name">FaithfulF <span class="brand-accent">Recipe Box</span></span>
+    </a>
+
+    <nav class="top-nav">
+      <a routerLink="/recipes" routerLinkActive="active">Recipes</a>
+      <a routerLink="/recipes/new" routerLinkActive="active">Add</a>
+      @if (auth.isAdmin()) {
+        <a routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Admin</a>
+        <a routerLink="/admin/settings" routerLinkActive="active">Settings</a>
+      }
+    </nav>
+
+    <div class="header-user">
+      @if (auth.isAdmin()) {
+        <span class="badge badge-admin">Admin</span>
+      }
+      <span class="user-email">{{ auth.user()?.email }}</span>
+      <button class="btn btn-ghost btn-sm" (click)="logout()">Logout</button>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <router-outlet />
+  </main>
+
+  <!-- Mobile bottom tab bar -->
+  <nav class="bottom-nav">
+    <a routerLink="/recipes" routerLinkActive="active">
+      <span class="ic">📖</span><span class="lbl">Recipes</span>
+    </a>
+    <a routerLink="/recipes/new" routerLinkActive="active">
+      <span class="ic">➕</span><span class="lbl">Add</span>
+    </a>
+    @if (auth.isAdmin()) {
+      <a routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <span class="ic">📊</span><span class="lbl">Admin</span>
+      </a>
+      <a routerLink="/admin/settings" routerLinkActive="active">
+        <span class="ic">⚙️</span><span class="lbl">Settings</span>
+      </a>
+    }
+  </nav>
+} @else {
+  <router-outlet />
+}

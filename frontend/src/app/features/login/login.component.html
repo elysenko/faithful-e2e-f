@@ -1,0 +1,50 @@
+<div class="auth-page">
+  <div class="auth-brand">
+    <span>🥘</span><span>FaithfulF <span class="accent">Recipe Box</span></span>
+  </div>
+  <p class="auth-tagline">Your personal collection of tried-and-true recipes.</p>
+
+  <div class="auth-card">
+    <h2>Welcome back</h2>
+    <p class="sub">Sign in to open your recipe box.</p>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email" autocomplete="email"
+               data-testid="login-email" placeholder="you@example.com" />
+        @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+          <span class="field-error">Enter a valid email address.</span>
+        }
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" formControlName="password" autocomplete="current-password"
+               data-testid="login-password" placeholder="••••••••" />
+        @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+          <span class="field-error">Password is required.</span>
+        }
+      </div>
+
+      @if (errorMessage) {
+        <div class="alert alert-error" style="margin-bottom: var(--space-4);">{{ errorMessage }}</div>
+      }
+
+      <button type="submit" class="btn btn-primary btn-block" data-testid="login-submit"
+              [disabled]="loading">
+        {{ loading ? 'Signing in…' : 'Sign in' }}
+      </button>
+    </form>
+
+    <p class="auth-alt">
+      New to FaithfulF? <a routerLink="/signup">Create an account</a>
+    </p>
+
+    <div class="auth-demo">
+      <button type="button" (click)="demoMode()" data-testid="demo-mode">
+        Skip login — explore Demo Mode →
+      </button>
+    </div>
+  </div>
+</div>
