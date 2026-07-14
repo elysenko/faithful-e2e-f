@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: faithful-e2e-f
+  namespace: colossus-faithful-e2e-f
+  labels:
+    app: faithful-e2e-f
+    managed-by: colossus
+spec:
+  type: ClusterIP
+  selector:
+    app: faithful-e2e-f
+  ports:
+    - port: 80
+      targetPort: 8080
