@@ -1,18 +1,39 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { Observable, from, map, switchMap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { AuthUser, UserRole } from '../models';
 
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'auth_user';
 
+/** Raw payload returned by POST /api/auth/{login,register}. */
+interface AuthResponse {
+  user: {
+    id: string;
+    name?: string;
+    email: string;
+    role: string; // backend enum is lowercase: 'admin' | 'user'
+    image?: string;
+    createdAt?: string;
+  };
+  token: string;
+}
+
 /**
- * Mockup auth service. Persists a lightweight session in localStorage so the
- * whole authenticated UI is reviewable without a live backend. The service_agent
- * stage replaces the mock login/register bodies with real HTTP calls to
- * POST /api/auth/login and POST /api/auth/register.
+ * Live auth service. Talks to the NestJS backend at POST /api/auth/login and
+ * POST /api/auth/register, persists the JWT (read by authInterceptor + authGuard)
+ * and a normalised session user in localStorage, and exposes reactive signals for
+ * the guards/navbar. The backend `role` enum is lowercase (admin|user); it is
+ * normalised to the frontend UserRole ('ADMIN'|'USER') on the way in.
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  private readonly base = `${environment.apiUrl}/auth`;
+
   private _user = signal<AuthUser | null>(this.readStoredUser());
 
   readonly user = this._user.asReadonly();
@@ -20,23 +41,41 @@ export class AuthService {
   readonly role = computed<UserRole | null>(() => this._user()?.role ?? null);
   readonly isAdmin = computed(() => this._user()?.role === 'ADMIN');
 
-  constructor(private router: Router) {}
-
-  /** Mock login — accepts any credentials; an email containing "admin" gets ADMIN. */
-  login(email: string, _password: string): void {
-    const role: UserRole = /admin/i.test(email) ? 'ADMIN' : 'USER';
-    this.persist({ id: 'u-' + email, email, role });
+  /** Live login — POST /api/auth/login → { user, token }. */
+  login(email: string, password: string): Observable<AuthUser> {
+    return this.http
+      .post<AuthResponse>(`${this.base}/login`, { email: email.trim(), password })
+      .pipe(map((res) => this.handleAuth(res)));
   }
 
-  /** Mock register — creates a USER session (public signup always creates USER). */
-  register(email: string, _password: string): void {
-    this.persist({ id: 'u-' + email, email, role: 'USER' });
+  /**
+   * Live register — POST /api/auth/register. Public signup always creates a USER.
+   * The backend requires a name and a password confirmation, so both are sent.
+   */
+  register(name: string, email: string, password: string): Observable<AuthUser> {
+    return this.http
+      .post<AuthResponse>(`${this.base}/register`, {
+        name: name.trim(),
+        email: email.trim(),
+        password,
+        passwordconf: password,
+      })
+      .pipe(map((res) => this.handleAuth(res)));
   }
 
-  /** Demo Mode — seeds an ADMIN session and jumps into the app. */
+  /**
+   * Demo Mode — logs in against the seeded admin (admin@example.com). The seed
+   * derives the password as sha256(email + SEED_SECRET).slice(0,16) with the
+   * default secret, so the demo works out-of-the-box against a seeded database.
+   */
   demoLogin(): void {
-    this.persist({ id: 'demo-admin', email: 'admin@faithfulf.dev', role: 'ADMIN' });
-    this.router.navigate(['/recipes']);
+    const email = 'admin@example.com';
+    from(this.derivePassword(email))
+      .pipe(switchMap((password) => this.login(email, password)))
+      .subscribe({
+        next: () => this.router.navigate(['/recipes']),
+        error: () => this.router.navigate(['/login']),
+      });
   }
 
   logout(): void {
@@ -47,12 +86,26 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 
-  private persist(user: AuthUser): void {
-    const mockToken = 'demo.' + btoa(user.email) + '.jwt';
+  /** Persist the session from a backend auth response and return the mapped user. */
+  private handleAuth(res: AuthResponse): AuthUser {
+    const user: AuthUser = {
+      id: res.user.id,
+      email: res.user.email,
+      role: this.normaliseRole(res.user.role),
+    };
+    this.persist(user, res.token);
+    return user;
+  }
+
+  private normaliseRole(role: string): UserRole {
+    return String(role).toUpperCase() === 'ADMIN' ? 'ADMIN' : 'USER';
+  }
+
+  private persist(user: AuthUser, token: string): void {
     // Mirror common key names so guards/screenshot tooling recognise the session.
-    localStorage.setItem(TOKEN_KEY, mockToken);
-    localStorage.setItem('token', mockToken);
-    localStorage.setItem('access_token', mockToken);
+    localStorage.setItem(TOKEN_KEY, token);
+    localStorage.setItem('token', token);
+    localStorage.setItem('access_token', token);
     localStorage.setItem('isAuthenticated', 'true');
     localStorage.setItem(USER_KEY, JSON.stringify(user));
     localStorage.setItem('user', JSON.stringify(user));
@@ -66,5 +119,16 @@ export class AuthService {
     } catch {
       return null;
     }
+  }
+
+  /** Mirrors the backend seed's deterministic password derivation. */
+  private async derivePassword(email: string): Promise<string> {
+    const secret = 'colossus-seed';
+    const data = new TextEncoder().encode(email + secret);
+    const digest = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(digest))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('')
+      .slice(0, 16);
   }
 }

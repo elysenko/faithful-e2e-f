@@ -35,8 +35,19 @@ export class LoginComponent {
     this.loading = true;
     this.errorMessage = '';
     const { email, password } = this.loginForm.value;
-    this.authService.login(email, password);
-    this.router.navigate(['/recipes']);
+    this.authService.login(email, password).subscribe({
+      next: () => this.router.navigate(['/recipes']),
+      error: (err) => {
+        this.loading = false;
+        this.errorMessage = this.readError(err) ?? 'Unable to sign in. Check your credentials.';
+      },
+    });
+  }
+
+  private readError(err: unknown): string | null {
+    const message = (err as { error?: { message?: string | string[] } })?.error?.message;
+    if (Array.isArray(message)) return message.join(' ');
+    return typeof message === 'string' ? message : null;
   }
 
   demoMode(): void {

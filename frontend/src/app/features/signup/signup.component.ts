@@ -45,8 +45,19 @@ export class SignupComponent {
     }
     this.loading = true;
     this.errorMessage = '';
-    const { email, password } = this.form.value;
-    this.authService.register(email, password);
-    this.router.navigate(['/recipes']);
+    const { name, email, password } = this.form.value;
+    this.authService.register(name, email, password).subscribe({
+      next: () => this.router.navigate(['/recipes']),
+      error: (err) => {
+        this.loading = false;
+        this.errorMessage = this.readError(err) ?? 'Unable to create your account. Please try again.';
+      },
+    });
+  }
+
+  private readError(err: unknown): string | null {
+    const message = (err as { error?: { message?: string | string[] } })?.error?.message;
+    if (Array.isArray(message)) return message.join(' ');
+    return typeof message === 'string' ? message : null;
   }
 }

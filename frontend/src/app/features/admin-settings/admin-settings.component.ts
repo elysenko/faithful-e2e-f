@@ -1,8 +1,9 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AdminSetting } from '../../core/models';
+import { AdminService } from '../../core/services/admin.service';
 
 interface ServiceGroup {
   service: string;
@@ -18,19 +19,23 @@ interface ServiceGroup {
   templateUrl: './admin-settings.component.html',
   styleUrl: './admin-settings.component.css',
 })
-export class AdminSettingsComponent {
-  // Data contract: mockup_cleaner empties this signal; service_agent wires it to
-  // AdminService.getSettings() in ngOnInit and updateSettings() on save.
-  settings = signal<AdminSetting[]>([
-    { key: 'DATABASE_URL', label: 'Connection URL', service: 'postgresql', value: 'postgres://****:****@db:5432/recipes', configured: true },
-    { key: 'MINIO_ENDPOINT', label: 'Endpoint', service: 'minio', value: '', configured: false },
-    { key: 'MINIO_ACCESS_KEY', label: 'Access key', service: 'minio', value: '', configured: false },
-    { key: 'MINIO_SECRET_KEY', label: 'Secret key', service: 'minio', value: '', configured: false },
-  ]);
+export class AdminSettingsComponent implements OnInit {
+  // Live data: masked infra settings resolved from the backend environment
+  // (GET /api/admin/settings). Values are env-sourced and read-only at runtime.
+  settings = signal<AdminSetting[]>([]);
 
   // Editable draft values keyed by setting key.
   draft = signal<Record<string, string>>({});
   savedService = signal<string | null>(null);
+
+  constructor(private adminService: AdminService) {}
+
+  ngOnInit(): void {
+    this.adminService.getSettings().subscribe({
+      next: (settings) => this.settings.set(settings),
+      error: () => {},
+    });
+  }
 
   private meta: Record<string, { label: string; icon: string }> = {
     postgresql: { label: 'PostgreSQL', icon: '🐘' },
@@ -61,21 +66,22 @@ export class AdminSettingsComponent {
 
   saveService(group: ServiceGroup): void {
     const draftValues = this.draft();
-    this.settings.update((list) =>
-      list.map((s) => {
-        if (s.service !== group.service) return s;
-        const entered = draftValues[s.key];
-        if (entered && entered.trim().length > 0) {
-          return { ...s, configured: true, value: this.mask(s.key, entered) };
-        }
-        return s;
-      }),
-    );
-    this.savedService.set(group.service);
-  }
+    // Only submit the (non-empty) draft values for this service group.
+    const patch: Record<string, string> = {};
+    for (const setting of group.keys) {
+      const entered = draftValues[setting.key];
+      if (entered && entered.trim().length > 0) {
+        patch[setting.key] = entered.trim();
+      }
+    }
 
-  private mask(key: string, value: string): string {
-    if (/url/i.test(key)) return value.replace(/\/\/[^@]+@/, '//****:****@');
-    return value.length <= 4 ? '****' : value.slice(0, 2) + '••••' + value.slice(-2);
+    this.adminService.updateSettings(patch).subscribe({
+      next: (settings) => {
+        // Backend returns the current effective (masked) settings.
+        this.settings.set(settings);
+        this.savedService.set(group.service);
+      },
+      error: () => {},
+    });
   }
 }
