@@ -1,0 +1,59 @@
+{
+  "site": {
+    "name": "tu-prep-ws15yu_x",
+    "site_id": "tu-prep-ws15yu_x"
+  },
+  "meta": {
+    "generated_by": "declared"
+  },
+  "front_end": {
+    "pages": [
+      {
+        "name": "Admin",
+        "page_id": "admin",
+        "url": "/admin",
+        "linked_page_ids": []
+      },
+      {
+        "name": "Settings",
+        "page_id": "admin-settings",
+        "url": "/admin/settings",
+        "linked_page_ids": []
+      },
+      {
+        "name": "Login",
+        "page_id": "login",
+        "url": "/login",
+        "linked_page_ids": []
+      },
+      {
+        "name": "Recipes",
+        "page_id": "recipes",
+        "url": "/recipes",
+        "linked_page_ids": []
+      },
+      {
+        "name": "Edit",
+        "page_id": "recipes-id-edit",
+        "url": "/recipes/:id/edit",
+        "linked_page_ids": []
+      },
+      {
+        "name": "New",
+        "page_id": "recipes-new",
+        "url": "/recipes/new",
+        "linked_page_ids": []
+      },
+      {
+        "name": "Signup",
+        "page_id": "signup",
+        "url": "/signup",
+        "linked_page_ids": []
+      }
+    ]
+  },
+  "back_end": {
+    "tables": []
+  },
+  "generated_by": "declared"
+}
